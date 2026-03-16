@@ -1,0 +1,18 @@
+{
+  "name": "my_mall_server",
+  "version": "1.0.0",
+  "description": "女人街商城后端 API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.19.1",
+    "sequelize": "^6.37.8"
+  }
+}
