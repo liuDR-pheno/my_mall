@@ -5,25 +5,38 @@ const router = express.Router();
 // Goods 模型：用来查商品列表、按 id 查详情
 const { Goods } = require('../models');
 
-// ========== 任务五：商品列表接口 GET /list（支持分页 limit、offset）==========
-// 示例：GET /api/goods/list?limit=10&offset=0
+// ========== 任务五：商品列表接口 GET /list（支持分页、关键词搜索、价格排序）==========
+// 示例：GET /api/goods/list?limit=10&offset=0&keyword=xxx&sort=price_asc
+const { Op } = require('sequelize');
+
 router.get('/list', async (req, res) => {
   try {
-    // 1. 从查询参数取 limit、offset，有默认值
-    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 100);  // 默认 10，最大 100
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 100);
     const offset = parseInt(req.query.offset, 10) || 0;
+    const keyword = (req.query.keyword || '').trim();
+    const sort = req.query.sort || 'id_asc'; // price_asc | price_desc | id_asc
 
-    // 2. 查总数（用于前端分页）
-    const { count } = await Goods.findAndCountAll();
+    const where = {};
+    if (keyword) {
+      where.name = { [Op.like]: `%${keyword}%` };
+    }
 
-    // 3. 分页查询
+    const orderMap = {
+      price_asc: [['price', 'ASC']],
+      price_desc: [['price', 'DESC']],
+      id_asc: [['id', 'ASC']]
+    };
+    const order = orderMap[sort] || orderMap.id_asc;
+
+    const { count } = await Goods.findAndCountAll({ where });
+
     const list = await Goods.findAll({
-      order: [['id', 'ASC']],
+      where,
+      order,
       limit,
       offset
     });
 
-    // 4. 返回：data 是当前页商品数组，total 是总条数
     res.json({
       code: 0,
       data: list,
